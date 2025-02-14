@@ -41,8 +41,28 @@ class Artifact(BaseModel):
     Used: List[UsedItem]
 
 
+class DamageAngel(BaseModel):
+    Bypass: Optional[int] = 0
+    Weak: Optional[int] = 0
+    Resist: Optional[int] = 0
+    Normal: Optional[int] = 0
+
+
+class DamageNormal(BaseModel):
+    Bypass: Optional[int] = 0
+    Weak: Optional[int] = 0
+    Resist: Optional[int] = 0
+    Normal: Optional[int] = 0
+
+
+class Damage(BaseModel):
+    Angel: DamageAngel
+    Normal: DamageNormal
+
+
 class Metric(BaseModel,extra='allow'):
     User: User | None
     Shard: Shard | None
     Island: Island | None
     Artifact: Artifact | None
+    Damage: Damage | None

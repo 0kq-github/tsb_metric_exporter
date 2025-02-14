@@ -2,6 +2,7 @@ from nbtlib import parse_nbt
 from mcrcon import MCRcon
 from models import Metric, User, Shard, Island, Artifact
 from typing import List, Dict, Literal
+from collections import defaultdict
 
 class TSBMetric:
   def __init__(self,host:str="localhost",port:int=25575,password:str="") -> None:
@@ -36,12 +37,13 @@ class TSBMetric:
     nbt:dict = parse_nbt(result[44:])
     if not nbt.get("User"): nbt["User"] = None
     if not nbt.get("Shard"): nbt["Shard"] = None
-    if nbt.get("Shard"): nbt["Shard"]["1"] = 0
-    if nbt.get("Shard"): nbt["Shard"]["2"] = 0
-    if nbt.get("Shard"): nbt["Shard"]["3"] = 0
-    if nbt.get("Shard"): nbt["Shard"]["4"] = 0
+    if nbt.get("Shard") and not nbt.get("Shard").get("1"): nbt["Shard"]["1"] = 0
+    if nbt.get("Shard") and not nbt.get("Shard").get("2"): nbt["Shard"]["2"] = 0
+    if nbt.get("Shard") and not nbt.get("Shard").get("3"): nbt["Shard"]["3"] = 0
+    if nbt.get("Shard") and not nbt.get("Shard").get("4"): nbt["Shard"]["4"] = 0
     if not nbt.get("Island"): nbt["Island"] = None
     if not nbt.get("Artifact"): nbt["Artifact"] = None
+    if not nbt.get("Damage"): nbt["Damage"] = None
     self._data = Metric(**nbt)
     return self._data
 
@@ -84,7 +86,7 @@ class TSBMetric:
     bonus = set_metric(name="tsbmetric_status_bonus",label_name="type",values={"health":str(self.fetch_bonus()[0]),"mp":str(self.fetch_bonus()[1]),"attack":str(self.fetch_bonus()[2]),"defense":str(self.fetch_bonus()[3])},help="Global status bonus",type="gauge")
     return from_storage + difficulty + player_online + entity_count + bonus
 
-def set_metric(name:str,label_name:str,values:Dict[str,str],help:str="",type:Literal["gauge","counter"]="gauge") -> str:
+def set_metric(name:str,label_name:str,values:Dict[str,str | int | float],help:str="",type:Literal["gauge","counter"]="gauge") -> str:
   _help = f"# HELP {name} {help}\n" if help else ""
   _type = f"# TYPE {name} {type}\n"
   _values = "\n".join([f"{name}{{{label_name}=\"{key}\"}} {value}" for key,value in values.items()])
@@ -118,7 +120,17 @@ def to_prometheus_metric(metric:Metric) -> str:
       case "Artifact":
         if not metric.Artifact:
           continue
-        result += set_metric(f"tsbmetric_artifact_used",label_name="type",values={"artifact_used":str(len(metric.Artifact.Used))},help="Artifact used count",type="counter")
+        used_count = defaultdict(lambda:0)
+        for artifact in metric.Artifact.Used:
+          used_count[artifact.ID] += 1
+        result += set_metric(f"tsbmetric_artifact_used",label_name="artifact_id",values=used_count,help="Artifact use count",type="counter")
+      case "Damage":
+        if not metric.Damage:
+          continue
+        angel_values = {key:value for key,value in metric.Damage.Angel.model_dump().items()}
+        normal_values = {key:value for key,value in metric.Damage.Normal.model_dump().items()}
+        result += set_metric(f"tsbmetric_damage_angel",label_name="damage_type",values=angel_values,help="Angel damage count",type="counter")
+        result += set_metric(f"tsbmetric_damage_normal",label_name="damage_type",values=normal_values,help="Normal damage count",type="counter")
   return result
 
 if __name__ == "__main__":
