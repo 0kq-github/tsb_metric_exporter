@@ -34,18 +34,23 @@ class TSBMetric:
     """
     with MCRcon(host=self.host,port=self.port,password=self.password) as mcr:
       result = mcr.command("data get storage metric:")
-    nbt:dict = parse_nbt(result[44:])
-    if not nbt.get("User"): nbt["User"] = None
-    if not nbt.get("Shard"): nbt["Shard"] = None
-    if nbt.get("Shard") and not nbt.get("Shard").get("1"): nbt["Shard"]["1"] = 0
-    if nbt.get("Shard") and not nbt.get("Shard").get("2"): nbt["Shard"]["2"] = 0
-    if nbt.get("Shard") and not nbt.get("Shard").get("3"): nbt["Shard"]["3"] = 0
-    if nbt.get("Shard") and not nbt.get("Shard").get("4"): nbt["Shard"]["4"] = 0
-    if not nbt.get("Island"): nbt["Island"] = None
-    if not nbt.get("Artifact"): nbt["Artifact"] = None
-    if not nbt.get("Damage"): nbt["Damage"] = None
-    self._data = Metric(**nbt)
-    return self._data
+    try:
+      nbt:dict = parse_nbt(result[44:])
+      if not nbt.get("User"): nbt["User"] = None
+      if not nbt.get("Shard"): nbt["Shard"] = None
+      if nbt.get("Shard") and not nbt.get("Shard").get("1"): nbt["Shard"]["1"] = 0
+      if nbt.get("Shard") and not nbt.get("Shard").get("2"): nbt["Shard"]["2"] = 0
+      if nbt.get("Shard") and not nbt.get("Shard").get("3"): nbt["Shard"]["3"] = 0
+      if nbt.get("Shard") and not nbt.get("Shard").get("4"): nbt["Shard"]["4"] = 0
+      if not nbt.get("Island"): nbt["Island"] = None
+      if not nbt.get("Artifact"): nbt["Artifact"] = None
+      if not nbt.get("Damage"): nbt["Damage"] = None
+      self._data = Metric(**nbt)
+    except Exception as e:
+      print(e)
+      return self._data
+    else:
+      return self._data
 
   def fetch_difficulty(self) -> int:
     """RCONで難易度を取得
