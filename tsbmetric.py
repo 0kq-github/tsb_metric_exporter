@@ -14,5 +14,8 @@ class TSBMetricRouter:
 
   @router.get("/metrics")
   async def get_metrics(self) -> Response:
-    self.client.fetch_metric()
+    try:
+      self.client.fetch_metric()
+    except ConnectionError as e:
+      return Response(content=f"RCON Connection Error\n{e}",status_code=503)
     return Response(content=self.client.parse_to_prometheus())
