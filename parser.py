@@ -36,10 +36,10 @@ class TSBMetric:
     nbt:dict = parse_nbt(result[44:])
     if not nbt.get("User"): nbt["User"] = None
     if not nbt.get("Shard"): nbt["Shard"] = None
-    if not nbt.get("Shard").get("1"): nbt["Shard"]["1"] = 0
-    if not nbt.get("Shard").get("2"): nbt["Shard"]["2"] = 0
-    if not nbt.get("Shard").get("3"): nbt["Shard"]["3"] = 0
-    if not nbt.get("Shard").get("4"): nbt["Shard"]["4"] = 0
+    if nbt.get("Shard"): nbt["Shard"]["1"] = 0
+    if nbt.get("Shard"): nbt["Shard"]["2"] = 0
+    if nbt.get("Shard"): nbt["Shard"]["3"] = 0
+    if nbt.get("Shard"): nbt["Shard"]["4"] = 0
     if not nbt.get("Island"): nbt["Island"] = None
     if not nbt.get("Artifact"): nbt["Artifact"] = None
     self._data = Metric(**nbt)
