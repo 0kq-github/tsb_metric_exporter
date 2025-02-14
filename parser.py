@@ -31,7 +31,6 @@ class TSBMetric:
   def fetch_metric(self) -> Metric:
     """RCONでメトリクスを取得
     """
-    print(f"{self.host=},{self.port=},{self.password=}")
     with MCRcon(host=self.host,port=self.port,password=self.password) as mcr:
       result = mcr.command("data get storage metric:")
     nbt:dict = parse_nbt(result[44:])
@@ -60,6 +59,16 @@ class TSBMetric:
       result = mcr.command("execute if entity @e")
     return int(result.split(" ")[-1])
 
+  def fetch_bonus(self) -> List[int]:
+    """RCONでステータスボーナスを取得
+    """
+    with MCRcon(host=self.host,port=self.port,password=self.password) as mcr:
+      bonus_health = int(mcr.command("scoreboard players get $BonusHealth Global").split(" ")[2])
+      bonus_mp = int(mcr.command("scoreboard players get $BonusMP Global").split(" ")[2])
+      bonus_attack = int(mcr.command("scoreboard players get $BonusAttack Global").split(" ")[2])
+      bonus_defense = int(mcr.command("scoreboard players get $BonusDefense Global").split(" ")[2])
+    return [bonus_health,bonus_mp,bonus_attack,bonus_defense]
+
   def fetch_player_count(self) -> int:
     """RCONでプレイヤー数を取得
     """
@@ -68,11 +77,12 @@ class TSBMetric:
     return int(player_list.split(" ")[2])
 
   def parse_to_prometheus(self) -> str:
-    metric_from_storage = to_prometheus_metric(self._data)
-    metric_difficulty = set_metric(name="tsbmetric_difficulty",label_name="type",values={"difficulty":str(self.fetch_difficulty())},help="Difficulty of server",type="gauge")
-    metric_player_online = set_metric(name="tsbmetric_player_online",label_name="type",values={"player_online":str(self.fetch_player_count())},help="Player count of server",type="gauge")
-    metric_entity_count = set_metric(name="tsbmetric_entity_count",label_name="type",values={"entity_count":str(self.fetch_entity_count())},help="Entity count of server",type="gauge")
-    return metric_from_storage + metric_difficulty + metric_player_online + metric_entity_count
+    from_storage = to_prometheus_metric(self._data)
+    difficulty = set_metric(name="tsbmetric_difficulty",label_name="type",values={"difficulty":str(self.fetch_difficulty())},help="Difficulty of server",type="gauge")
+    player_online = set_metric(name="tsbmetric_player_online",label_name="type",values={"player_online":str(self.fetch_player_count())},help="Player count of server",type="gauge")
+    entity_count = set_metric(name="tsbmetric_entity_count",label_name="type",values={"entity_count":str(self.fetch_entity_count())},help="Entity count of server",type="gauge")
+    bonus = set_metric(name="tsbmetric_status_bonus",label_name="type",values={"health":str(self.fetch_bonus()[0]),"mp":str(self.fetch_bonus()[1]),"attack":str(self.fetch_bonus()[2]),"defense":str(self.fetch_bonus()[3])},help="Global status bonus",type="gauge")
+    return from_storage + difficulty + player_online + entity_count + bonus
 
 def set_metric(name:str,label_name:str,values:Dict[str,str],help:str="",type:Literal["gauge","counter"]="gauge") -> str:
   _help = f"# HELP {name} {help}\n" if help else ""
