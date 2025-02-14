@@ -79,8 +79,7 @@ def to_prometheus_metric(metric:Metric) -> str:
       case "Artifact":
         if not metric.Artifact:
           continue
-        metric_values = {str(used.ID):str(used.Time) for used in metric.Artifact.Used}
-        result += _to_prometheus_metric(f"tsbmetric_artifact_used_time",label_name="artifact_id",values=metric_values,help="Artifact used time",type="gauge")
+        result += _to_prometheus_metric(f"tsbmetric_artifact_used",label_name="count",values={"count":str(len(metric.Artifact.Used))},help="Artifact used count",type="counter")
   return result
 
 if __name__ == "__main__":
