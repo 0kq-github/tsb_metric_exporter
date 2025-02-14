@@ -14,5 +14,5 @@ class TSBMetricRouter:
 
   @router.get("/metrics")
   async def get_metrics(self) -> Response:
-    data = self.client.fetch_metric()
-    return Response(content=to_prometheus_metric(data))
+    self.client.fetch_metric()
+    return Response(content=self.client.parse_to_prometheus())
