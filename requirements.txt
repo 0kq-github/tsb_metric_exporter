@@ -3,6 +3,7 @@ anyio==4.8.0
 click==8.1.8
 colorama==0.4.6
 fastapi==0.115.8
+fastapi-utils==0.8.0
 h11==0.14.0
 idna==3.10
 mcrcon==0.7.0

@@ -1,6 +1,6 @@
 from fastapi import Response
 from fastapi.routing import APIRouter
-from fastapi_restful.cbv import cbv
+from fastapi_utils.cbv import cbv
 from parser import TSBMetric
 import os
 
