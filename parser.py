@@ -52,7 +52,8 @@ class TSBMetric:
     """
     with MCRcon(host=self.host,port=self.port,password=self.password) as mcr:
       result = mcr.command("scoreboard players get $Difficulty Global")
-    return int(result[16])
+    print(result)
+    return int(result.split(" ")[-2])
   
   def fetch_entity_count(self) -> int:
     """RCONでエンティティ数を取得
