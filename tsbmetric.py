@@ -12,7 +12,7 @@ class TSBMetricRouter:
     self.client = TSBMetric(host=os.getenv("RCON_HOST"),port=int(os.getenv("RCON_PORT")),password=os.getenv("RCON_PASSWORD"))
     self.router = router
 
-  @router.get("/metrics")
+  @router.get("/metrics",tags=["exporter"])
   async def get_metrics(self) -> Response:
     try:
       self.client.fetch_metric()

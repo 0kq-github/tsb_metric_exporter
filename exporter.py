@@ -6,7 +6,10 @@ import os
 from tsbmetric import TSBMetricRouter
 
 load_dotenv(dotenv_path=".env",verbose=True)
-app = FastAPI()
+app = FastAPI(
+  title="TSB Exporter",
+  description="TSB Exporter",
+  )
 
 app.include_router(TSBMetricRouter().router)
 
