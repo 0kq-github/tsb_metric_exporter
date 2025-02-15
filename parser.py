@@ -36,15 +36,15 @@ class TSBMetric:
       raw_user = mcr.command("data get storage metric: User")
       raw_shard = mcr.command("data get storage metric: Shard")
       raw_island = mcr.command("data get storage metric: Island")
-      raw_artifact = mcr.command("data get storage metric: Artifact")
+      raw_artifact_used = mcr.command("data get storage metric: Artifact.Used")
       raw_damage = mcr.command("data get storage metric: Damage")
-    nbt_user,nbt_shard,nbt_island,nbt_artifact,nbt_damage = None,None,None,None,None
-    if not raw_user.startswith("Found no elements"): nbt_user = silent_parse_nbt(" ".join(raw_user.split(" ")[6:]))
-    if not raw_shard.startswith("Found no elements"): nbt_shard = silent_parse_nbt(" ".join(raw_shard.split(" ")[6:]))
-    if not raw_island.startswith("Found no elements"): nbt_island = silent_parse_nbt(" ".join(raw_island.split(" ")[6:]))
-    if not raw_artifact.startswith("Found no elements"): nbt_artifact = silent_parse_nbt(" ".join(raw_artifact.split(" ")[6:]))
-    if not raw_damage.startswith("Found no elements"): nbt_damage = silent_parse_nbt(" ".join(raw_damage.split(" ")[6:]))
-    self._data = Metric(User=User(**nbt_user) if nbt_user else None,Shard=Shard(**nbt_shard) if nbt_shard else None,Island=Island(**nbt_island) if nbt_island else None,Artifact=Artifact(**nbt_artifact) if nbt_artifact else None,Damage=Damage(**nbt_damage) if nbt_damage else None)
+    nbt_user,nbt_shard,nbt_island,nbt_artifact_used,nbt_damage = None,None,None,None,None
+    if not raw_user.startswith("Found no elements"): nbt_user = silent_parse_nbt(" ".join(raw_user.split(" ",6)[6:]))
+    if not raw_shard.startswith("Found no elements"): nbt_shard = silent_parse_nbt(" ".join(raw_shard.split(" ",6)[6:]))
+    if not raw_island.startswith("Found no elements"): nbt_island = silent_parse_nbt(" ".join(raw_island.split(" ",6)[6:]))
+    if not raw_artifact_used.startswith("Found no elements"): nbt_artifact_used = silent_parse_nbt(" ".join(raw_artifact_used.split(" ",6)[6:]))
+    if not raw_damage.startswith("Found no elements"): nbt_damage = silent_parse_nbt(" ".join(raw_damage.split(" ",6)[6:]))
+    self._data = Metric(User=User(**nbt_user) if nbt_user else None,Shard=Shard(**nbt_shard) if nbt_shard else None,Island=Island(**nbt_island) if nbt_island else None,Artifact=Artifact(Used=nbt_artifact_used) if nbt_artifact_used else None,Damage=Damage(**nbt_damage) if nbt_damage else None)
     return self._data
 
   def fetch_difficulty(self) -> int:
