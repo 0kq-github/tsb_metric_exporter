@@ -1,6 +1,6 @@
-from nbtlib import parse_nbt
+from utils import silent_parse_nbt
 from mcrcon import MCRcon
-from models import Metric, User, Shard, Island, Artifact
+from models import Metric, User, Shard, Island, Artifact, Damage
 from typing import List, Dict, Literal
 from collections import defaultdict
 
@@ -33,24 +33,19 @@ class TSBMetric:
     """RCONでメトリクスを取得
     """
     with MCRcon(host=self.host,port=self.port,password=self.password) as mcr:
-      result = mcr.command("data get storage metric:")
-    try:
-      nbt:dict = parse_nbt(result[44:])
-      if not nbt.get("User"): nbt["User"] = None
-      if not nbt.get("Shard"): nbt["Shard"] = None
-      if nbt.get("Shard") and not nbt.get("Shard").get("1"): nbt["Shard"]["1"] = 0
-      if nbt.get("Shard") and not nbt.get("Shard").get("2"): nbt["Shard"]["2"] = 0
-      if nbt.get("Shard") and not nbt.get("Shard").get("3"): nbt["Shard"]["3"] = 0
-      if nbt.get("Shard") and not nbt.get("Shard").get("4"): nbt["Shard"]["4"] = 0
-      if not nbt.get("Island"): nbt["Island"] = None
-      if not nbt.get("Artifact"): nbt["Artifact"] = None
-      if not nbt.get("Damage"): nbt["Damage"] = None
-      self._data = Metric(**nbt)
-    except Exception as e:
-      print(e)
-      return self._data
-    else:
-      return self._data
+      raw_user = mcr.command("data get storage metric: User")
+      raw_shard = mcr.command("data get storage metric: Shard")
+      raw_island = mcr.command("data get storage metric: Island")
+      raw_artifact = mcr.command("data get storage metric: Artifact")
+      raw_damage = mcr.command("data get storage metric: Damage")
+    nbt_user,nbt_shard,nbt_island,nbt_artifact,nbt_damage = None,None,None,None,None
+    if not raw_user.startswith("Found no elements"): nbt_user = silent_parse_nbt(" ".join(raw_user.split(" ")[6:]))
+    if not raw_shard.startswith("Found no elements"): nbt_shard = silent_parse_nbt(" ".join(raw_shard.split(" ")[6:]))
+    if not raw_island.startswith("Found no elements"): nbt_island = silent_parse_nbt(" ".join(raw_island.split(" ")[6:]))
+    if not raw_artifact.startswith("Found no elements"): nbt_artifact = silent_parse_nbt(" ".join(raw_artifact.split(" ")[6:]))
+    if not raw_damage.startswith("Found no elements"): nbt_damage = silent_parse_nbt(" ".join(raw_damage.split(" ")[6:]))
+    self._data = Metric(User=User(**nbt_user) if nbt_user else None,Shard=Shard(**nbt_shard) if nbt_shard else None,Island=Island(**nbt_island) if nbt_island else None,Artifact=Artifact(**nbt_artifact) if nbt_artifact else None,Damage=Damage(**nbt_damage) if nbt_damage else None)
+    return self._data
 
   def fetch_difficulty(self) -> int:
     """RCONで難易度を取得
@@ -103,6 +98,8 @@ def to_prometheus_metric(metric:Metric) -> str:
 
   result = ""
   #storageのmetricから取得した値の変形
+  if not metric:
+    return ""
   for key in metric.model_dump().keys():
     match key:
       case "User":

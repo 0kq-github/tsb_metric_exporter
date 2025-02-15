@@ -16,10 +16,10 @@ class User(BaseModel):
 
 
 class Shard(BaseModel):
-    rarity_1: int = Field(..., alias='1')
-    rarity_2: int = Field(..., alias='2')
-    rarity_3: int = Field(..., alias='3')
-    rarity_4: int = Field(..., alias='4')
+    rarity_1: Optional[int] = Field(0, alias='1')
+    rarity_2: Optional[int] = Field(0, alias='2')
+    rarity_3: Optional[int] = Field(0, alias='3')
+    rarity_4: Optional[int] = Field(0, alias='4')
 
 
 class OrderItem(BaseModel):

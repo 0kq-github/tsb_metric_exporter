@@ -1,7 +1,7 @@
 from fastapi import Response
 from fastapi.routing import APIRouter
 from fastapi_restful.cbv import cbv
-from parser import TSBMetric, to_prometheus_metric
+from parser import TSBMetric
 import os
 
 router = APIRouter()
