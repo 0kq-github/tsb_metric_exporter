@@ -13,4 +13,4 @@ app.include_router(TSBMetricRouter().router)
 
 
 if __name__ == "__main__":
-  uvicorn.run(app="exporter:app",host=os.getenv("APP_HOST"),port=int(os.getenv("APP_PORT")),reload=True)
+  uvicorn.run(app="exporter:app",host=os.getenv("APP_HOST"),port=int(os.getenv("APP_PORT")))
